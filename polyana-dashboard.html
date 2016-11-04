@@ -3,7 +3,7 @@
 <link rel="import" href="../timerange-picker/timerange-picker.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="dashboard-row.html">
-<link rel="import" href="add-panel.html">
+
 
 <dom-module id="polyana-dashboard">
     <template>
@@ -26,7 +26,6 @@
         }
     </style>
     <paper-card class="layout horizontal stretch">
-        <add-panel uri="[[_computeMetricsUri(dashboard)]]"></add-panel>
         <timerange-picker from="{{from}}" to="{{to}}" on-tap="_handleTap" style="float:right;"></timerange-picker>
     </paper-card>
         <iron-ajax
@@ -92,40 +91,10 @@
                 'resizeDone': '_saveDashboard',
                 'graphChanged': '_saveDashboard',
                 'refresh':'_autoRefresh',
-                'panelAdded':'_panelAdded'
             },
 
             _handleTap: function() {
                 clearRefresh(this);
-            },
-
-            _panelAdded:function (e){
-              console.log("i got",e.detail);
-              var panel ={
-                "lines": true,
-                "aliasColors": {},
-                "datasource": "mist.monitor",
-                "id": this.dashboard.rows[0].panels.length,
-                "span": 12,
-                "stack": false,
-                "targets": [{
-                    "refId": "A",
-                    "target": e.detail
-                }],
-                "timeFrom": null,
-                "timeShift": null,
-                "title": e.detail.split(".")[0],
-                "type": "graph",
-                "machineArray": [[this.dashboard.rows[0].panels[0].machineArray[0][0], this.dashboard.rows[0].panels[0].machineArray[0][1]]],
-                "x-axis": true,
-                "y-axis": true
-              }
-              this.push("dashboard.rows.0.panels",panel);
-              console.log(this.dashboard);
-            },
-
-            _computeMetricsUri: function(dashboard) {
-              return "/api/v1/clouds/" + dashboard.rows[0].panels[0].machineArray[0][0] + "/machines/" + dashboard.rows[0].panels[0].machineArray[0][1]+ "/metrics";
             },
 
             _saveDashboard: function(e) {

@@ -233,7 +233,6 @@
                 //because autorefresh is on dashboard and we are no longer using "auto" on ajax request we need to track changes in "from" value in order to generate the request again
                 if (this.panel != null && this.querySelector("iron-ajax")) {
                     this.async(function() {
-                        console.log("requesting")
                         if (this.datasourceType == 'graphite')
                             this.querySelector("iron-ajax").generateRequest()
                         else if (this.datasourceType == 'mist.monitor') {
@@ -376,6 +375,7 @@
                     dimensions.push(this.querySelector('paper-card').clientWidth);
                     dimensions.push(this.rowh);
                     this.chartData.size = dimensions;
+                    console.log(this.chartData);
                     this.chartElement.load(this.chartData);
                     if (this.panel.bars) {
                         this.chartData.type = "bar";
