@@ -70,7 +70,7 @@
         <div>[[panel.prefix]] [[panel.postfix]] [[panel.valueMaps.0.op]]</div>
       </template>
       <template is="dom-if" if="[[_isGraph(panel)]]">
-        <paper-spinner active="[[loading]]"></paper-spinner>
+        <paper-spinner active="{{loading}}"></paper-spinner>
         <c3-chart id="[[_computePanelId(panel.title)]]" from="[[from]]" chart-id="[[_computePanelId(panel.title)]]"></c3-chart>
       </template>
       <template is="dom-if" if="[[_isDashlist(panel)]]">
