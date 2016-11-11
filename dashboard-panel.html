@@ -146,6 +146,7 @@
                   },
                   y: {
                       label: {
+                          text: '',
                           position: 'inner-top'
                       },
                       min: 0,
@@ -413,6 +414,12 @@
       },
 
       _handlePanelResponse: function(data) {
+          var metricUnits="";
+          for (var p in data.metrics){
+            metricUnits = data.metrics[p].unit;
+            console.log('UNIT',metricUnits);
+          }
+          this.set('chartAxis.y.label.text', metricUnits);
           //when we get the first real response we should stop the auto attribut because machines are updated constantly
           if (data.metrics != null || data.detail.response != null) {
               this.querySelector('#dataRequest').removeAttribute("auto");
@@ -421,10 +428,12 @@
           //if refresh is on then we need to flow the data not to redraw them
           if (!this.refreshOn || !this.chartData.columns.length) {
               var cols = transformData(this, data);
+              console.log('DATA',data);
               this.set('chartData', {
                   xs: cols.xs,
                   columns: cols.columns
               });
+
               //remove all the null values from drawn data so there is no gap when we draw the new ones
               for (var j = this.chartData.columns.length / 2; j < this.chartData.columns.length; j++) {
                   for (var k = this.chartData.columns[j].length; k >= 0; k--) {
