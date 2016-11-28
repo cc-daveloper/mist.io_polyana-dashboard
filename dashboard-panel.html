@@ -136,33 +136,7 @@
                 },
                 newData: {
                     type: Object,
-                    value: {
-                      labels: ["January", "February", "March", "April", "May", "June", "July"],
-datasets: [
-  {
-    label: "My First dataset",
-    backgroundColor: "rgba(220,220,220,0.2)",
-    borderColor: "rgba(220,220,220,1)",
-    borderWidth: 1,
-    pointBackgroundColor: "rgba(220,220,220,1)",
-    pointBorderColor: "#fff",
-    pointHoverBackgroundColor: "#fff",
-    pointHoverBorderColor: "rgba(220,220,220,1)",
-    data: [65, 59, 80, 81, 56, 55, 40]
-  },
-  {
-    label: "My Second dataset",
-    backgroundColor: "rgba(151,187,205,0.2)",
-    borderColor: "rgba(151,187,205,1)",
-    borderWidth: 1,
-    pointBackgroundColor: "rgba(151,187,205,1)",
-    pointBorderColor: "#fff",
-    pointHighlightFill: "#fff",
-    pointHoverBorderColor: "rgba(151,187,205,1)",
-    data: [28, 48, 40, 19, 86, 27, 90]
-  }
-]
-                    }
+                    value: {}
                 },
                 opts: {
                     type: Object,
@@ -172,7 +146,7 @@ datasets: [
                                 stacked: false
                             }],
                             xAxes: [{
-                              display: false
+                                display: false
                             }]
                         }
                     }
@@ -281,7 +255,7 @@ datasets: [
                         //instead of doing the whole request (eg we are displaying -1h and we get 1h worth of data). we should request data from our max autorefresh option
                         that.to = Math.floor(new Date().getTime() / 1000);
                         if (typeof that.chartData.columns[0] != "undefined" && that.chartData.columns[0].length > 1) {
-                            that.from = Math.floor(that.chartData.columns[0][that.chartData.columns[0].length - 1].getTime() / 1000) - 600; //"-10min";
+                            that.from = Math.floor(that.chartData.columns[0][that.chartData.columns[0].length - 1].getTime() / 1000) - 60; //"-10min";
                         }
                         that._refresh();
                     } else {
@@ -544,7 +518,7 @@ datasets: [
                 if (!this.refreshOn) {
                     //console.log("load");
                     cols = this.transformData(data);
-                    //this.newData=this.formatData(data);
+                    this.newData = this.formatData(data);
                     this.set('chartData', {
                         xs: cols.xs,
                         columns: cols.columns
@@ -576,13 +550,35 @@ datasets: [
                     }
                     if (this.panel.stack) {
                         this._stackIt();
-                        this.opts.scales.yAxes.stacked=true;
+                        this.opts.scales.yAxes[0].stacked = true;
+                        this.querySelector('chart-line').options=this.opts;
+                        console.log(this.querySelector('chart-line').options);
+                        this.querySelector('chart-line').updateChart();
                     }
                 } else { // flow the new data from auto refresh
                     // console.log("refresh");
                     cols = this.transformData(data);
+                    var cols2 = this.formatData(data);
+                    var originalLength=this.newData.labels.length;
+                    for (var a = this.newData.labels.length-1; a >=0; a--) {
+                        if (cols2.labels[0] >= this.newData.labels[a]) {
+                            var diff=this.newData.labels.length-a;
+                            this.newData.labels.splice(a, diff);
+                            this.newData.labels=this.newData.labels.concat(cols2.labels);
+                            var howmany=this.newData.labels.length-originalLength;
+                            this.newData.labels.splice(0, howmany);
+                            for (var b = 0; b < this.newData.datasets.length; b++) {
+                                this.newData.datasets[b].data.splice(a, diff);
+                                this.newData.datasets[b].data=this.newData.datasets[b].data.concat(cols2.datasets[b].data);
+                                this.newData.datasets[b].data.splice(0, howmany);
+                            }
+                            this.querySelector('chart-line').options=this.opts;
+                            this.querySelector('chart-line').data = this.newData;
+                            this.querySelector('chart-line').updateChart();
+                            break;
+                        }
+                    }
 
-                    this.querySelector('chart-line').updateChart();
                     // get the last time value we have drawn in the graph for each target
                     for (var b = 0; b < this.chartData.columns.length / 2; b++) {
                         var lastdrawn = "";
@@ -688,10 +684,11 @@ datasets: [
                         datasets: []
                     };
                     for (var k = 0; k < datanames.length; k++) {
-                      ret.labels.push(datanames[k]);
-                      ret.datasets.push({label:datanames[k],data:columns[k]})
+                        ret.datasets.push({
+                            label: datanames[k],
+                            data: columns[k]
+                        })
                     }
-                    console.log(ret);
                     return ret;
                 }
             },
