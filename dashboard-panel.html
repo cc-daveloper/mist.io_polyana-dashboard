@@ -82,7 +82,7 @@
         <c3-chart id="[[_computePanelId(panel.id, panel.title)]]" from="[[from]]" chart-id="[[_computePanelId(panel.id, panel.title)]]"></c3-chart>
       </template>
     <template is="dom-if" if="[[_isGraph(panel)]]">
-        <chart-line options="[[opts]]" data='{{newData}}'></chart-line>
+        <chart-line id="[[_computePanelIdChart(panel.id, panel.title)]]" chart-id="[[_computePanelIdChart(panel.id, panel.title)]]"></chart-line>
       </template>
     <template is="dom-if" if="[[_isDashlist(panel)]]">
         <div><!-- TODO -->...</div>
@@ -141,15 +141,17 @@
                 opts: {
                     type: Object,
                     value: {
-                        scales: {
-                            yAxes: [{
-                                stacked: false
-                            }],
-                            xAxes: [{
-                                display: false
-                            }]
-                        }
-                    }
+                    		scales: {
+                    			yAxes: [{
+                    				stacked:false,
+                            //display:false
+                    			}],
+                          xAxes: [{
+                    				type: 'time',
+                    				position: 'bottom',
+                    			}]
+                    		}
+}
                 },
                 chartData: {
                     type: Object,
@@ -519,6 +521,10 @@
                     //console.log("load");
                     cols = this.transformData(data);
                     this.newData = this.formatData(data);
+                    if (this.panel.stack)
+                    this.opts.scales.yAxes[0].stacked = true;
+
+                    this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).load(this.formatData(data),this.opts);
                     this.set('chartData', {
                         xs: cols.xs,
                         columns: cols.columns
@@ -550,35 +556,28 @@
                     }
                     if (this.panel.stack) {
                         this._stackIt();
-                        this.opts.scales.yAxes[0].stacked = true;
-                        this.querySelector('chart-line').options=this.opts;
-                        console.log(this.querySelector('chart-line').options);
-                        this.querySelector('chart-line').updateChart();
                     }
                 } else { // flow the new data from auto refresh
                     // console.log("refresh");
                     cols = this.transformData(data);
                     var cols2 = this.formatData(data);
-                    var originalLength=this.newData.labels.length;
-                    for (var a = this.newData.labels.length-1; a >=0; a--) {
-                        if (cols2.labels[0] >= this.newData.labels[a]) {
-                            var diff=this.newData.labels.length-a;
-                            this.newData.labels.splice(a, diff);
-                            this.newData.labels=this.newData.labels.concat(cols2.labels);
-                            var howmany=this.newData.labels.length-originalLength;
-                            this.newData.labels.splice(0, howmany);
-                            for (var b = 0; b < this.newData.datasets.length; b++) {
-                                this.newData.datasets[b].data.splice(a, diff);
-                                this.newData.datasets[b].data=this.newData.datasets[b].data.concat(cols2.datasets[b].data);
-                                this.newData.datasets[b].data.splice(0, howmany);
-                            }
-                            this.querySelector('chart-line').options=this.opts;
-                            this.querySelector('chart-line').data = this.newData;
-                            this.querySelector('chart-line').updateChart();
+                    for(var b=0; b<this.newData.datasets.length; b++){
+                    var originalLength=this.newData.datasets[b].data.length;
+                    for (var a = this.newData.datasets[b].data.length-1; a >=0; a--) {
+                      //if we have greater or equl date
+                        if (cols2.datasets[b].data[0].x >= this.newData.datasets[b].data[a].x) {
+                            //var diff=this.newData.datasets[b].data.length-a;
+                            this.newData.datasets[b].data.splice(a, originalLength-a);
+                            this.newData.datasets[b].data=this.newData.datasets[b].data.concat(cols2.datasets[b].data);
+                            var howmany=this.newData.datasets[b].data.length-originalLength;
+                            this.newData.datasets[b].data.splice(0, howmany);
+                            // this.querySelector('chart-line').options=this.opts;
+                            // this.querySelector('chart-line').data = this.newData;
                             break;
                         }
                     }
-
+}
+                              this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).update(this.newData);
                     // get the last time value we have drawn in the graph for each target
                     for (var b = 0; b < this.chartData.columns.length / 2; b++) {
                         var lastdrawn = "";
@@ -669,18 +668,18 @@
                         points = [];
                         if (response[metr] != null) {
                             for (var i = 0; i < response[metr].datapoints.length; i++) {
-                                x.push(response[metr].datapoints[i][1]);
-                                points.push(response[metr].datapoints[i][0]);
+                                //x.push(response[metr].datapoints[i][1]);
+                                //points.push(response[metr].datapoints[i][0]);
+                                points.push({x:new Date(response[metr].datapoints[i][1]*1000),y:response[metr].datapoints[i][0]})
                             }
                             datanames.push(response[metr].name);
                             columns.push(points);
-                            for (var j = 0; j < x.length; j++) {
-                                x[j] = new Date(x[j] * 1000);
-                            }
+                            // for (var j = 0; j < x.length; j++) {
+                            //     x[j] = new Date(x[j] * 1000);
+                            // }
                         }
                     }
                     var ret = {
-                        labels: x,
                         datasets: []
                     };
                     for (var k = 0; k < datanames.length; k++) {
@@ -793,7 +792,9 @@
             _computePanelId: function(id, title) {
                 return title.replace(/ /g, "-") + "-panel" + id;
             },
-
+            _computePanelIdChart: function(id, title) {
+                return title.replace(/ /g, "-") + "-panel" + id+"-chartjs";
+            },
             _computeTitle: function(title) {
                 if (title)
                     return title.replace(/_/g, " ");
