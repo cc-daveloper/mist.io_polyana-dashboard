@@ -4,6 +4,7 @@
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/chart-elements/chart-elements.html">
 <link rel="import" href="panel-edit.html">
@@ -18,12 +19,10 @@
                 box-sizing: border-box;
                 transition: height 500ms ease-in;
             }
-
             #target {
                 font-weight: bold;
                 text-align: left;
             }
-
             paper-material {
                 width: 100%;
                 padding: 0 16px 16px 16px;
@@ -31,7 +30,6 @@
                 overflow: auto;
                 background-color: #f1f1f1;
             }
-
             h3 {
                 text-transform: uppercase;
                 font-size: 16px;
@@ -39,17 +37,18 @@
                 line-height: 36px;
                 cursor: move;
             }
-
             .head {
                 align-items: center;
             }
 
+            .head {
+                align-items: center;
+            }
             paper-spinner {
                 position: absolute;
                 left: 50%;
                 top: 24px;
             }
-
             paper-icon-button {
                 opacity: 0.32;
             }
