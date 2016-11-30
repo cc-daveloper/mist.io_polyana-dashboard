@@ -82,7 +82,7 @@
         <c3-chart id="[[_computePanelId(panel.id, panel.title)]]" from="[[from]]" chart-id="[[_computePanelId(panel.id, panel.title)]]"></c3-chart>
       </template>
     <template is="dom-if" if="[[_isGraph(panel)]]">
-        <chart-line id="[[_computePanelIdChart(panel.id, panel.title)]]" chart-id="[[_computePanelIdChart(panel.id, panel.title)]]"></chart-line>
+        <chart-line id="[[_computePanelIdChart(panel.id, panel.title)]]" type="line" data="[[newData]]" options="[[opts]]" style="width: 400px; height: 300px;"></chart-line>
       </template>
     <template is="dom-if" if="[[_isDashlist(panel)]]">
         <div><!-- TODO -->...</div>
@@ -137,6 +137,21 @@
                 newData: {
                     type: Object,
                     value: {}
+                },
+                testData:{
+                  type:Object,
+                  value:{
+                    labels:[],
+                    datasets: [{
+                      label: 'apples',
+                      data: [{x:1, y:19},{x: 2,y: 17},{x: 3,y: 3}],
+                      backgroundColor: "rgba(153,255,51,0.6)"
+                    }, {
+                      label: 'oranges',
+                      data: [{x:1,y: 29}, {x:2, y:5},{x: 3,y: 3}],
+                      backgroundColor: "rgba(255,153,0,0.6)"
+                    }]
+                  }
                 },
                 opts: {
                     type: Object,
@@ -521,10 +536,16 @@
                     //console.log("load");
                     cols = this.transformData(data);
                     this.newData = this.formatData(data);
-                    if (this.panel.stack)
-                    this.opts.scales.yAxes[0].stacked = true;
-
-                    this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).load(this.formatData(data),this.opts);
+                    if (this.panel.stack){
+                      this.opts.scales.yAxes[0].stacked = true;
+                        console.log("stacked ",this.panel.title);
+                    }
+                    else{
+                        this.opts.scales.yAxes[0].stacked = false;
+                    }
+                    this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).updateChart();
+                    //this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).load(this.formatData(data),this.opts);
+                    console.log(this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).data,this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).options)
                     this.set('chartData', {
                         xs: cols.xs,
                         columns: cols.columns
@@ -577,7 +598,9 @@
                         }
                     }
 }
-                              this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).update(this.newData);
+// this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).data=this.newData;
+this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).updateChart();
+                              // this.querySelector("#"+this._computePanelIdChart(this.panel.id, this.panel.title)).update(this.newData);
                     // get the last time value we have drawn in the graph for each target
                     for (var b = 0; b < this.chartData.columns.length / 2; b++) {
                         var lastdrawn = "";
@@ -680,6 +703,7 @@
                         }
                     }
                     var ret = {
+                        labels:[],
                         datasets: []
                     };
                     for (var k = 0; k < datanames.length; k++) {
