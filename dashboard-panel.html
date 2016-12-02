@@ -62,24 +62,24 @@
                 <template is="dom-if" if="[[panel.editable]]">
                     <panel-edit date-format="{{chartAxis.x.tick.format}}" step={{step}} panel="{{panel}}"></panel-edit>
                 </template>
-            </div>
-            <template is="dom-if" if="[[_isText(panel)]]">
+    </div>
+    <template is="dom-if" if="[[_isText(panel)]]">
                 <div>[[panel.content]]</div>
             </template>
-            <template is="dom-if" if="[[_isSinglestat(panel)]]">
+    <template is="dom-if" if="[[_isSinglestat(panel)]]">
                 <div>[[panel.prefix]] [[panel.postfix]] [[panel.valueMaps.0.op]]</div>
             </template>
-            <template is="dom-if" if="[[_isGraph(panel)]]">
+    <template is="dom-if" if="[[_isGraph(panel)]]">
                 <paper-spinner active="[[loading]]"></paper-spinner>
                 <chart-line id="[[_computePanelId(panel.id, panel.title)]]" data="[[chartData]]" options="[[chartOptions]]" type="line" style="width:100%; height:500px"></chart-line>
             </template>
-            <template is="dom-if" if="[[_isDashlist(panel)]]">
+    <template is="dom-if" if="[[_isDashlist(panel)]]">
                 <div><!-- TODO -->...</div>
             </template>
-            <template is="dom-if" if="[[_isTable(panel)]]">
+    <template is="dom-if" if="[[_isTable(panel)]]">
                 <div><!-- TODO -->...</div>
             </template>
-        </paper-material>
+    </paper-material>
     </template>
     <script>
         Polymer({
@@ -116,7 +116,16 @@
                 chartElement: Object,
                 chartData: {
                     type: Object,
-                    value: {}
+                    value: {
+                        labels: [],
+                        datasets: [{
+                            label: "",
+                            data: []
+                        }, {
+                            label: "",
+                            data: []
+                        }]
+                    }
                 },
                 chartOptions: {
                     type: Object,
