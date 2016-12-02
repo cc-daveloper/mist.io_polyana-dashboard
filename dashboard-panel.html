@@ -164,7 +164,7 @@
                             }],
                             xAxes: [{
                                 type: 'time',
-                                position: 'bottom',
+                                position: 'bottom'
                             }]
                         }
                     }
@@ -479,6 +479,7 @@
                         color = i;
                     }
                     this.chartData.datasets[i].backgroundColor = this.colorArray[color];
+                    this.chartData.datasets[i].borderColor = this.colorArray[color];
                 }
                 this.chartElement.options.scales.yAxes[0].scaleLabel.labelString = this.labelString(this.chartData.datasets);
                 this.chartElement.querySelector("canvas").width = "600";
@@ -575,9 +576,13 @@
                         labels: [],
                         datasets: []
                     };
+                    var fill = false;
+                    if (this.panel.stack)
+                        fill = true;
                     for (var k = 0; k < datanames.length; k++) {
                         ret.datasets.push({
                             label: datanames[k],
+                            fill: fill,
                             data: columns[k]
                         })
                     }
